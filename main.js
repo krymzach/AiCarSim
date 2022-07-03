@@ -60,12 +60,16 @@ function findBestCar() {
     let bestCar;
     for (let i = 0; i < cars.length; i++) {
         let fitness = cars[i].y / ((road.width - 20) / (road.laneCount + 1) - (cars[i].laneCenterDistance + 500));
-        if(!bestFitness || bestFitness < fitness) {
+        if((!bestFitness || bestFitness < fitness) && cars[i].x != road.getLaneCenter(1)) {
             bestFitness = fitness;
             bestCar = cars[i];
         }
     }
-    return bestCar;
+    if(bestCar) {
+        return bestCar;
+    } else {
+        return cars[0];
+    }
 }
 
 function animate(time) {
@@ -102,3 +106,8 @@ function animate(time) {
     Visualizer.drawNetwork(networkCtx, bestCar.brain);
     requestAnimationFrame(animate);
 }
+
+setTimeout(() => {
+    save();
+    location.reload();
+}, 35000);
