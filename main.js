@@ -2,13 +2,17 @@ const carCanvas = document.getElementById("carCanvas");
 carCanvas.width = 200;
 
 const networkCanvas = document.getElementById("networkCanvas");
-networkCanvas.width = 300;
+networkCanvas.width = 500;
 
 const carCtx = carCanvas.getContext("2d");
 networkCtx = networkCanvas.getContext("2d");
-const road = new Road(carCanvas.width / 2, carCanvas.width*0.9);
+const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9);
+let laneCenters = [];
+for (let i = 0; i < road.laneCount; i++) {
+    laneCenters.push(road.getLaneCenter(i));
+}
 
-const N = 1;
+const N = 50;
 const cars = generateCars(N);
 let bestCar = cars[0];
 if(localStorage.getItem("bestBrain")) {
@@ -51,19 +55,30 @@ function generateCars(N) {
     return cars;
 }
 
+function findBestCar() {
+    let bestFitness;
+    let bestCar;
+    for (let i = 0; i < cars.length; i++) {
+        let fitness = cars[i].y / ((road.width - 20) / (road.laneCount + 1) - (cars[i].laneCenterDistance + 500));
+        if(!bestFitness || bestFitness < fitness) {
+            bestFitness = fitness;
+            bestCar = cars[i];
+        }
+    }
+    return bestCar;
+}
+
 function animate(time) {
     for(let i = 0; i < traffic.length; i++) {
-        traffic[i].update(road.borders, []);
+        traffic[i].update(road.borders, [], [], road.laneLines);
     }
     
     for(let i = 0; i < cars.length; i++) {
-        cars[i].update(road.borders, traffic);
+        cars[i].update(road.borders, traffic, laneCenters, road.laneLines);
     }
 
-    bestCar = cars.find(
-        c => c.y == Math.min(
-            ...cars.map(c => c.y)
-    ));
+
+    bestCar = findBestCar();
 
     carCanvas.height = window.innerHeight;
     networkCanvas.height = window.innerHeight;

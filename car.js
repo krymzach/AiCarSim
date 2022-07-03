@@ -14,11 +14,13 @@ class Car {
 
         this.useBrain = controlType == "AI";
 
+        this.laneCenterDistance = 0;
+
         if(controlType != "DUMMY") {
             this.sensor = new Sensor(this);
             this.brain = new NeuralNetwork(
                 // 3 Layers, Inputs, Hidden Layer, and Outputs
-                [this.sensor.rayCount, 6, 4]
+                [this.sensor.rayCount * 2, 11, 4]
             );
         }
         this.controls = new Controls(controlType);
@@ -41,17 +43,23 @@ class Car {
         }
     }
 
-    update(roadBorders, traffic) {
+    update(roadBorders, traffic, laneCenters, laneLines) {
         if(!this.damaged) {
             this.#move();
             this.polygon = this.#createPolygon();
             this.damaged = this.#assessDamage(roadBorders, traffic);
         }
+        if(this.useBrain) {
+            this.laneCenterDistance = this.#findDistanceToLaneCenter(laneCenters);
+        }
         if(this.sensor) {
-            this.sensor.update(roadBorders, traffic);
-            const offsets = this.sensor.readings.map(
-                s => s== null ? 0 : 1 - s.offset
+            this.sensor.update(roadBorders, traffic, laneLines);
+            let offsets = this.sensor.borderCarReadings.map(
+                s => s == null ? 0 : 1 - s.offset
             );
+            offsets.push(...this.sensor.laneLineReadings.map(
+                s => s == null ? 0 : 1 - s.offset
+            ));
             const outputs = NeuralNetwork.feedForward(offsets, this.brain);
 
             if(this.useBrain) {
@@ -61,6 +69,18 @@ class Car {
                 this.controls.reverse = outputs[3];
             }
         }
+    }
+
+    #findDistanceToLaneCenter(laneCenters) {
+        // this.x to lane center
+        let closestDistance;
+        for (let i = 0; i < laneCenters.length; i++) {
+            let currDistance = Math.abs(this.x - laneCenters[i]);
+            if(!closestDistance || closestDistance > currDistance) {
+                closestDistance = currDistance;
+            }
+        }
+        return closestDistance;
     }
 
     #assessDamage(roadBorders, traffic) {

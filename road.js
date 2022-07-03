@@ -16,10 +16,25 @@ class Road {
         const bottomLeft = {x: this.left, y: this.bottom};
         const bottomRight = {x: this.right, y: this.bottom};
 
+        this.laneLines = this.getLaneLines();
+
         this.borders = [
             [topLeft, bottomLeft],
             [topRight, bottomRight]
         ];
+    }
+
+    getLaneLines() {
+        let lanes = [];
+        for (let i = 1; i <= this.laneCount - 1; i++) {
+            let x = lerp(
+                this.left,
+                this.right,
+                i/this.laneCount
+            );
+            lanes.push([{x: x, y: this.top}, {x: x, y: this.bottom}]);
+        }
+        return lanes;
     }
 
     getLaneCenter(laneIndex) {
