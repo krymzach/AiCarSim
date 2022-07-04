@@ -7,9 +7,18 @@ body {
     align-items: center;
 }
 
+.col {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
 #verticalButtons {
     display: flex;
     flex-direction: column;
+    margin-bottom: 15px;
 }
 
 button {
@@ -22,7 +31,7 @@ button {
 }
 
 button:hover {
-    background: blue;
+    background: rgb(220, 220, 220);
 }
 
 #networkCanvas {

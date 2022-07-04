@@ -1,8 +1,10 @@
+document.getElementById('genCount').innerText = localStorage.getItem('genCount') ? "Generation: " + String(localStorage.getItem('genCount')) : "Generation: 1";
+
 const carCanvas = document.getElementById("carCanvas");
 carCanvas.width = 200;
 
 const networkCanvas = document.getElementById("networkCanvas");
-networkCanvas.width = 500;
+networkCanvas.width = 1000;
 
 const carCtx = carCanvas.getContext("2d");
 networkCtx = networkCanvas.getContext("2d");
@@ -12,7 +14,8 @@ for (let i = 0; i < road.laneCount; i++) {
     laneCenters.push(road.getLaneCenter(i));
 }
 
-const N = 50;
+const N = 10;
+document.getElementById('carCount').innerText = "Cars: " + N;
 const cars = generateCars(N);
 let bestCar = cars[0];
 if(localStorage.getItem("bestBrain")) {
@@ -27,13 +30,13 @@ if(localStorage.getItem("bestBrain")) {
 }
 
 const traffic = [
-    new Car(road.getLaneCenter(1), -100, 30, 50, "DUMMY", 2, "red"),
-    new Car(road.getLaneCenter(0), -300, 30, 50, "DUMMY", 2, "red"),
-    new Car(road.getLaneCenter(2), -300, 30, 50, "DUMMY", 2, "red"),
-    new Car(road.getLaneCenter(0), -500, 30, 50, "DUMMY", 2, "red"),
-    new Car(road.getLaneCenter(1), -500, 30, 50, "DUMMY", 2, "red"),
-    new Car(road.getLaneCenter(1), -700, 30, 50, "DUMMY", 2, "red"),
-    new Car(road.getLaneCenter(2), -700, 30, 50, "DUMMY", 2, "red")
+    new Car(road.getLaneCenter(Math.round(Math.random() * 2)), -Math.round(Math.random() * 1000), 30, 50 + Math.round(Math.random() * 50), "DUMMY", 1 + Math.round(Math.random() * 2), "red"),
+    new Car(road.getLaneCenter(Math.round(Math.random() * 2)), -Math.round(Math.random() * 1000), 30, 50 + Math.round(Math.random() * 50), "DUMMY", 2, "red"),
+    new Car(road.getLaneCenter(Math.round(Math.random() * 2)), -Math.round(Math.random() * 1000), 30, 50 + Math.round(Math.random() * 50), "DUMMY", 2, "red"),
+    new Car(road.getLaneCenter(Math.round(Math.random() * 2)), -Math.round(Math.random() * 1000), 30, 50 + Math.round(Math.random() * 50), "DUMMY", 2, "red"),
+    new Car(road.getLaneCenter(Math.round(Math.random() * 2)), -Math.round(Math.random() * 1000), 30, 50 + Math.round(Math.random() * 50), "DUMMY", 2, "red"),
+    new Car(road.getLaneCenter(Math.round(Math.random() * 2)), -Math.round(Math.random() * 1000), 30, 50 + Math.round(Math.random() * 50), "DUMMY", 2, "red"),
+    new Car(road.getLaneCenter(Math.round(Math.random() * 2)), -Math.round(Math.random() * 1000), 30, 50 + Math.round(Math.random() * 50), "DUMMY", 2, "red")
 ];
 
 animate();
@@ -41,10 +44,13 @@ animate();
 function save() {
     localStorage.setItem("bestBrain",
         JSON.stringify(bestCar.brain));
+    localStorage.setItem("genCount", localStorage.getItem("genCount") ? localStorage.getItem("genCount") + 1 : 2);
 }
 
 function discard() {
     localStorage.removeItem("bestBrain");
+    localStorage.setItem("genCount", 1);
+    location.reload();
 }
 
 function generateCars(N) {
@@ -60,7 +66,7 @@ function findBestCar() {
     let bestCar;
     for (let i = 0; i < cars.length; i++) {
         let fitness = cars[i].y / ((road.width - 20) / (road.laneCount + 1) - (cars[i].laneCenterDistance + 500));
-        if((!bestFitness || bestFitness < fitness) && cars[i].x != road.getLaneCenter(1)) {
+        if((!bestFitness || bestFitness < fitness) && cars[i].x != road.getLaneCenter(1) && Math.abs(cars[i].angle) < Math.PI / 2) {
             bestFitness = fitness;
             bestCar = cars[i];
         }
@@ -110,4 +116,4 @@ function animate(time) {
 setTimeout(() => {
     save();
     location.reload();
-}, 35000);
+}, 75000);
